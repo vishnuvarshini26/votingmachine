@@ -1,0 +1,71 @@
+//testbench
+
+module tb_voting_machine;
+  reg clk;
+  reg rest;
+  reg vote_en;
+  reg[1:0]vote;
+  wire[2:0]count1,count2,count3;
+  voting_machine uut(
+    .clk(clk),
+    .rest(rest),
+    .vote_en(vote_en),
+    .vote(vote),
+    .count1(count1),
+    .count2(count2),
+    .count3(count3)
+  );
+    always #5 clk = ~clk;
+    initial begin
+      clk = 0;
+      rest = 0;
+      vote_en = 0;
+      vote = 2'b00;
+      
+      rest = 1;
+      #10;
+      rest = 0;
+      vote_en = 1;
+      
+      vote = 2'b00;
+      #10;
+      vote = 2'b01;
+      #10;
+      vote = 2'b10;
+      #5;
+      vote_en = 0;
+      #10;
+      rest = 1;
+      #10;
+      rest = 0;
+      $finish;
+    end
+    initial begin
+      $monitor("Time=%0t | count1=%d, count2=%d, count3=%d", $time, count1, count2, count3);
+  end
+endmodule
+
+//RTL Code
+
+module voting_machine(
+  input clk,
+  input rest,
+  input vote_en,
+  input[1:0]vote,
+  output reg[2:0] count1,count2,count3);
+  always@(posedge clk)begin
+    if(rest)begin
+      count1<=0;
+      count2<=0;
+      count3<=0;
+    end
+    else if(vote_en)begin
+      case(vote)
+        2'b00:count1<=count1 + 1;
+        2'b01:count2<=count2 + 1;
+        2'b10:count3<=count3 + 1;
+        default:;
+      endcase
+    end
+  end
+endmodule
